@@ -78,12 +78,8 @@ def model_to_clip_transform(points, xy_scale=0.9, z_scale=0.3):
     center = Translation(points.centre_of_bounds()).pseudoinverse()
     # 2. Scale the points to exactly fit the boundaries
     scale = Scale(points.range() / 2.0)
-    # 3. Apply the relaxations requested - note the flip in the z axis!!
-    # This is because OpenGL by default evaluates depth as bigger number ==
-    # further away. Thus not only do we need to get to clip space [-1, 1] in
-    # all dims) but we must invert the z axis so depth buffering is correctly
-    # applied.
-    b_scale = NonUniformScale([xy_scale, xy_scale, -z_scale])
+    # 3. Apply the relaxations requested
+    b_scale = NonUniformScale([xy_scale, xy_scale, z_scale])
     return center.compose_before(scale.pseudoinverse()).compose_before(b_scale)
 
 
