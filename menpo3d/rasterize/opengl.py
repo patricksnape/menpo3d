@@ -1,3 +1,10 @@
+try:
+    # There seems to be some bug that if VTK isn't imported before the
+    # rasterizer then we are unable to create an opengl context. So we just
+    # import it here if we can, in order to mitigate this
+    import vtk
+except ImportError:
+    pass
 import numpy as np
 from cyrasterize.base import CyRasterizerBase
 
