@@ -117,8 +117,9 @@ class GLRasterizer(CyRasterizerBase):
                              'trilist properties.')
         if hasattr(mesh, 'tcoords'):
             images = self._rasterize_texture_with_interp(
-                mesh.points, mesh.trilist, mesh.texture.pixels, mesh.tcoords.points,
-                normals=normals, per_vertex_f3v=per_vertex_f3v)
+                mesh.points, mesh.trilist,
+                mesh.texture.pixels_with_channels_at_back(out_dtype=np.float32),
+                mesh.tcoords.points, normals=normals, per_vertex_f3v=per_vertex_f3v)
         else:
             #TODO: This should use a different shader!
             # TODO This should actually use the colour provided.
@@ -131,7 +132,7 @@ class GLRasterizer(CyRasterizerBase):
             # Fake some texture coordinates and a texture as required by the
             # shader
             fake_tcoords = np.random.randn(mesh.n_points, 2)
-            fake_texture = np.zeros([2, 2, 3])
+            fake_texture = np.zeros([2, 2, 3], dtype=np.float32)
 
             # The RGB image is going to be broken due to the fake texture
             # information we passed in
@@ -261,10 +262,8 @@ class GLRasterizer(CyRasterizerBase):
 
         """
         # make a call out to the CyRasterizer _rasterize method
-        # first, roll the axes to get things to the way OpenGL expects them
-        texture = np.rollaxis(texture, 0, len(texture.shape))
         rgb_pixels, f3v_pixels, mask = self._rasterize(
-            points, trilist, texture, tcoords, normals=normals, per_vertex_f3v=per_vertex_f3v)
-        # roll back the results so things are as Menpo expects
-        return (MaskedImage(np.array(np.rollaxis(rgb_pixels, -1), dtype=np.float), mask=mask),
-                MaskedImage(np.array(np.rollaxis(f3v_pixels, -1), dtype=np.float), mask=mask))
+            points, trilist, texture, tcoords, normals=normals,
+            per_vertex_f3v=per_vertex_f3v)
+        return (MaskedImage.init_from_channels_at_back(rgb_pixels, mask=mask),
+                MaskedImage.init_from_channels_at_back(f3v_pixels, mask=mask))
