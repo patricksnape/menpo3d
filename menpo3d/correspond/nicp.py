@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import scipy.sparse as sp
 from menpo.shape import TriMesh
@@ -5,20 +6,19 @@ from menpo.transform import Translation, UniformScale
 from menpo3d.vtkutils import trimesh_to_vtk, VTKClosestPointLocator
 
 try:
-    
     try:
         # First try the newer scikit-sparse namespace
         from sksparse.cholmod import cholesky_AAt
     except ImportError:
         # Fall back to the older scikits.sparse namespace
         from scikits.sparse.cholmod import cholesky_AAt
-
     # user has cholesky available - provide a fast solve
     def spsolve(sparse_X, dense_b):
         factor = cholesky_AAt(sparse_X.T)
         return factor(sparse_X.T.dot(dense_b)).toarray()
 
 except ImportError:
+    warnings.warn('Using slow scipy sparse linalg')
     # fallback to (much slower) scipy solve
     from scipy.sparse.linalg import spsolve as scipy_spsolve
 
