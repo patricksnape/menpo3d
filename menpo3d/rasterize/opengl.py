@@ -270,11 +270,16 @@ class GLRasterizer:
         model_matrix=None,
         view_matrix=None,
         projection_matrix=None,
+        opengl_min_version=None,
+        opengl_backend=None
     ):
         # Make a single OpenGL context that will be managed by the lifetime of
         # this class. We will dynamically create two default "pass through"
         # programs based on the type of the input mesh
-        self.opengl_ctx = moderngl.create_standalone_context()
+        self.opengl_ctx = moderngl.create_standalone_context(
+            require=opengl_min_version,
+            backend=opengl_backend
+        )
         self.width = width
         self.height = height
 
